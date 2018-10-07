@@ -71,6 +71,7 @@ struct sbus_devtable sbusDeviceTable[] = {
     {SBUS_DEVICE_TCX, FBTYPE_TCXCOLOR, "tcx", "suntcx", "Sun TCX"},
     {SBUS_DEVICE_FFB, FBTYPE_CREATOR, "ffb", "sunffb", "Sun FFB"},
     {SBUS_DEVICE_FFB, FBTYPE_CREATOR, "afb", "sunffb", "Sun Elite3D"},
+    {SBUS_DEVICE_UNK, FBTYPE_LASTPLUSONE + 1, "unknown", "unknown", "Unknown FB"},
     {0, 0, NULL}
 };
 

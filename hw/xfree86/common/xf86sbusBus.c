@@ -40,6 +40,10 @@
 #include "xf86sbusBus.h"
 #include "xf86Sbus.h"
 
+#ifdef sun
+# include <sys/visual_io.h>
+#endif
+
 Bool sbusSlotClaimed = FALSE;
 
 static int xf86nSbusInfo;
@@ -231,8 +235,25 @@ xf86SbusProbe(void)
                 free(promPath);
             }
         }
-        else
+        else {
+#ifdef sun
+            if (psdp->devId == SBUS_DEVICE_UNK) {
+                int fbfd;
+
+                fbfd = open(psdp->device, O_RDONLY, 0);
+                if (fbfd >= 0) {
+                    struct vis_identifier   visid;
+                    if (ioctl(fbfd, VIS_GETIDENTIFIER, &visid) >= 0) {
+                        psdp->descr = strdup(visid.name);
+                    }
+                    close(fbfd);
+                }
+            }
+            xf86Msg(X_PROBED, "%s: %s", psdp->device, psdp->descr);
+#else
             xf86Msg(X_PROBED, "SBUS: %s", psdp->descr);
+#endif
+        }
         xf86ErrorF("\n");
     }
     if (useProm)
