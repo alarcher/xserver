@@ -108,6 +108,10 @@ OR PERFORMANCE OF THIS SOFTWARE.
 void (*OsVendorVErrorFProc) (const char *, va_list args) = NULL;
 #endif
 
+#ifdef sun
+extern void RemoveXauthSymFile(void);
+#endif
+
 static FILE *logFile = NULL;
 static int logFileFd = -1;
 static Bool logFlush = FALSE;
@@ -1007,6 +1011,9 @@ FatalError(const char *f, ...)
     VErrorFSigSafe(f, args);
     va_end(args);
     ErrorFSigSafe("\n");
+#ifdef sun
+    RemoveXauthSymFile();
+#endif
     if (!beenhere)
         OsVendorFatalError(f, args2);
     va_end(args2);

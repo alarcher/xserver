@@ -45,6 +45,9 @@
 #define	CONSOLE_VTNO	1
 #define	SOL_CONSOLE_DEV	"/dev/console"
 
+/* For use of VT_SETDISPLOGIN in dtlogin.c */
+extern int xf86ConsoleFd;
+
 static Bool KeepTty = FALSE;
 static Bool UseConsole = FALSE;
 
@@ -216,6 +219,8 @@ xf86OpenConsole(void)
 
             if (ioctl(xf86Info.consoleFd, VT_SETDISPINFO, atoi(display)) < 0)
                 xf86Msg(X_WARNING, "xf86OpenConsole: VT_SETDISPINFO failed\n");
+
+	    xf86ConsoleFd = xf86Info.consoleFd;
         }
 #endif
 

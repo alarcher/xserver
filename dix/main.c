@@ -78,6 +78,8 @@ Equipment Corporation.
 #include <version-config.h>
 #endif
 
+#include <sys/stat.h>
+#include <stdio.h>
 #include <X11/X.h>
 #include <X11/Xos.h>            /* for unistd.h  */
 #include <X11/Xproto.h>
@@ -125,6 +127,36 @@ extern void DtloginCloseDown(void);
 
 extern void Dispatch(void);
 
+#if defined(sun)
+extern const char * GetAuthFilename(void);
+static char sym_authfile[40];
+
+#define LOCK_PREFIX    "/var/xauth/"
+
+/*
+ * Setup /var/xauth/$DISPLAY, which is a symlink to the
+ * actually auth file.
+*/
+static void
+SetupXauthFile(char *filename)
+{
+        struct stat buf;
+
+        snprintf(sym_authfile, 40, LOCK_PREFIX "%s", display);
+
+        mkdir(LOCK_PREFIX, S_IRWXU);
+
+        remove(sym_authfile);
+        symlink(filename, sym_authfile);
+}
+
+void
+RemoveXauthSymFile(void)
+{
+        remove(sym_authfile);
+}
+#endif
+
 CallbackListPtr RootWindowFinalizeCallback = NULL;
 
 int
@@ -132,6 +164,9 @@ dix_main(int argc, char *argv[], char *envp[])
 {
     int i;
     HWEventQueueType alwaysCheckForInput[2];
+#if defined(sun)
+    char *xauthfile = NULL;
+#endif
 
     display = "0";
 
@@ -144,6 +179,12 @@ dix_main(int argc, char *argv[], char *envp[])
     InitConnectionLimits();
 
     ProcessCommandLine(argc, argv);
+
+#if defined(sun)
+    xauthfile = GetAuthFilename();
+    if (xauthfile)
+        SetupXauthFile(xauthfile);
+#endif
 
     alwaysCheckForInput[0] = 0;
     alwaysCheckForInput[1] = 1;
