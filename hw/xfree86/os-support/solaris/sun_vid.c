@@ -22,7 +22,7 @@
  * OF THIS SOFTWARE.
  *
  */
-/* Copyright (c) 2008, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2008, 2017, Oracle and/or its affiliates. All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -100,8 +100,9 @@ xf86DisableIO(void)
     if (!ExtendedEnabled)
         return;
 
-    sysi86(SI86V86, V86SC_IOPL, 0);
-
-    ExtendedEnabled = FALSE;
+    if (sysi86(SI86V86, V86SC_IOPL, 0) < 0)
+        xf86Msg(X_WARNING, "xf86DisableIOPorts: Failed to set IOPL for I/O\n");
+    else
+        ExtendedEnabled = FALSE;
 #endif                          /* i386 */
 }

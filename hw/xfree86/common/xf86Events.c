@@ -456,6 +456,16 @@ xf86VTEnter(void)
     if (!xf86VTSwitchTo())
         return;
 
+#ifdef __sun  /* restore root privs needed to restore device access */
+    uid_t user_id = geteuid();
+
+    if (user_id != 0) {
+        if (seteuid(0) < 0) {
+            xf86Msg(X_WARNING, "Error in resetting euid to root \n");
+        }
+    }
+#endif
+
 #ifdef XF86PM
     xf86OSPMClose = xf86OSPMOpen();
 #endif
@@ -495,6 +505,14 @@ xf86VTEnter(void)
 #ifdef XSERVER_PLATFORM_BUS
     /* check for any new output devices */
     xf86platformVTProbe();
+#endif
+
+#ifdef __sun
+    if (user_id != 0) {               /* reset privs back to user */
+        if (seteuid(user_id) < 0) {
+            xf86Msg(X_WARNING, "Error in resetting euid to %d\n", user_id);
+        }
+    }
 #endif
 
     xf86UpdateHasVTProperty(TRUE);
