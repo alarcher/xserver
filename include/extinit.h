@@ -115,6 +115,14 @@ extern _X_EXPORT Bool noMITShmExtension;
 extern void ShmExtensionInit(void);
 #endif
 
+#define SolarisIAExtension
+
+#ifdef SolarisIAExtension
+#include <X11/extensions/interactive.h>
+extern _X_EXPORT Bool noIAExtension;
+extern void IAExtensionInit(void);
+#endif
+
 extern void SyncExtensionInit(void);
 
 extern void XCMiscExtensionInit(void);

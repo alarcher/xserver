@@ -173,6 +173,9 @@ Bool noXvExtension = FALSE;
 #ifdef DRI2
 Bool noDRI2Extension = FALSE;
 #endif
+#ifdef SolarisIAExtension
+Bool noIAExtension = FALSE;
+#endif
 
 Bool noGEExtension = FALSE;
 

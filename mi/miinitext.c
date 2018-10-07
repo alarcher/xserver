@@ -167,8 +167,14 @@ static const ExtensionModule staticExtensions[] = {
 #ifdef DRI3
     {dri3_extension_init, "DRI3", NULL},
 #endif
+#ifdef SolarisIAExtension
+    { IANAME /* "SolarisIA" */, &noIAExtension },
+#endif
 #ifdef RES
     {ResExtensionInit, "X-Resource", &noResExtension},
+#endif
+#ifdef SolarisIAExtension
+    {IAExtensionInit, IANAME, &noIAExtension},
 #endif
 #ifdef XV
     {XvExtensionInit, "XVideo", &noXvExtension},

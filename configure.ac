@@ -1393,6 +1393,10 @@ AC_DEFINE(XINPUT, 1, [Support X Input extension])
 XI_LIB='$(top_builddir)/Xi/libXi.la'
 XI_INC='-I$(top_srcdir)/Xi'
 
+# SolarisIA extension
+IA_LIB='$(top_builddir)/IA/libIA.la'
+XEXT_LIB="${XEXT_LIB} ${IA_LIB}"
+
 AM_CONDITIONAL(XF86UTILS, test "x$XF86UTILS" = xyes)
 AM_CONDITIONAL(VGAHW, test "x$VGAHW" = xyes)
 AM_CONDITIONAL(VBE, test "x$VBE" = xyes)
@@ -2592,3 +2596,6 @@ xserver.ent
 xorg-server.pc
 ])
 AC_OUTPUT
+
+# Add Sun IA extension
+AC_OUTPUT([IA/Makefile])

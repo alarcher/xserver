@@ -58,6 +58,7 @@ SUBDIRS = \
 	$(GLX_DIR) \
 	$(PRESENT_DIR) \
 	$(DRI3_DIR) \
+	IA \
 	exa \
 	$(GLAMOR_DIR) \
 	config \
