@@ -305,7 +305,13 @@ shift
 LC_ALL=C
 export LC_ALL
 ${CPP:-cpp} "$@" sdksyms.c > /dev/null || exit $?
-${CPP:-cpp} "$@" sdksyms.c | ${AWK:-awk} -v topdir=$topdir '
+# Some cpps add spaces in the middle of __attribute__((visibility(...)))
+# so we need to remove them for the following awk script to work.
+# Changes by alanc upstream
+${CPP:-cpp} "$@" sdksyms.c | \
+    ${SED:-sed} -e 's/( /(/g' -e 's/_ (/_(/g' -e 's/ )/)/g' \
+    -e 's/visibility (/visibility(/' | \
+    ${AWK:-awk} -v topdir=$topdir '
 BEGIN {
     sdk = 0;
     print("/*");

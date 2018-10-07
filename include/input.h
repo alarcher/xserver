@@ -607,7 +607,7 @@ void FixUpEventFromWindow(SpritePtr pSprite,
                           xEvent *xE,
                           WindowPtr pWin, Window child, Bool calcChild);
 extern Bool PointInBorderSize(WindowPtr pWin, int x, int y);
-extern WindowPtr XYToWindow(SpritePtr pSprite, int x, int y);
+extern _X_EXPORT WindowPtr XYToWindow(SpritePtr pSprite, int x, int y);
 extern int EventIsDeliverable(DeviceIntPtr dev, int evtype, WindowPtr win);
 extern Bool ActivatePassiveGrab(DeviceIntPtr dev, GrabPtr grab,
                                 InternalEvent *ev, InternalEvent *real_event);

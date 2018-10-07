@@ -39,7 +39,9 @@ AM_CPPFLAGS = \
 
 modesetting_drv_la_LTLIBRARIES = modesetting_drv.la
 modesetting_drv_la_LDFLAGS = -module -avoid-version
-modesetting_drv_la_LIBADD = $(UDEV_LIBS) $(DRM_LIBS)
+modesetting_drv_la_LDFLAGS += $(XORG_EXTERNS_FLAG)
+modesetting_drv_la_LIBADD = $(UDEV_LIBS) $(DRM_LIBS) $(LIBDRM_LIBS) $(top_builddir)/fb/libfb.la $(top_builddir)/miext/shadow/libshadow.la
+
 modesetting_drv_ladir = @moduledir@/drivers
 
 modesetting_drv_la_SOURCES = \
