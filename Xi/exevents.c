@@ -225,7 +225,16 @@ CopyKeyClass(DeviceIntPtr device, DeviceIntPtr master)
 {
     KeyClassPtr mk = master->key;
 
+#ifdef SUNSOFT
+    DeviceIntPtr mdev = dixLookupPrivate(&master->devPrivates,
+	HotkeyMapDevicePrivateKey);
+#endif
+
+#ifdef SUNSOFT
+    if ((device == master) || (device == mdev))
+#else
     if (device == master)
+#endif
         return;
 
     mk->sourceid = device->id;

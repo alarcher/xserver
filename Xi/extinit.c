@@ -374,6 +374,10 @@ Mask PropagateMask[EMASKSIZE];
 
 DevPrivateKeyRec XIClientPrivateKeyRec;
 
+#ifdef SUNSOFT
+DevPrivateKeyRec HotkeyMapDevicePrivateKeyRec;
+#endif
+
 /*****************************************************************
  *
  * Declarations of local routines.
@@ -1285,6 +1289,11 @@ XInputExtensionInit(void)
     if (!dixRegisterPrivateKey
         (&XIClientPrivateKeyRec, PRIVATE_CLIENT, sizeof(XIClientRec)))
         FatalError("Cannot request private for XI.\n");
+
+#ifdef SUNSOFT   
+    if (!dixRegisterPrivateKey(&HotkeyMapDevicePrivateKeyRec, PRIVATE_DEVICE, 0))
+        FatalError("Cannot request private for hotkey.\n");
+#endif
 
     if (!XIBarrierInit())
         FatalError("Could not initialize barriers.\n");

@@ -124,6 +124,49 @@ get_prop_string_array(LibHalContext * hal_ctx, const char *udi,
     return ret;
 }
 
+#ifdef SUNSOFT
+static void
+add_extra_device(char *driver)
+{
+    DeviceIntPtr	dev;
+    char		*config_info = NULL;
+    InputOption 	*input_options = NULL;
+    InputAttributes	attrs = {0};
+
+    input_options = input_option_new(NULL, "_source", "server/hal");
+    if (!input_options){
+	LogMessage(X_ERROR, "config/hal: couldn't allocate first key/value pair\n");
+	goto unwind;
+    }
+
+    input_options = input_option_new(input_options, "driver", driver);
+    input_options = input_option_new(input_options, "name", driver);
+
+    if (!asprintf(&config_info, "hal:%s", driver) == -1) {
+	config_info = NULL;
+	LogMessage(X_ERROR, "config/hal: couldn't allocate name\n");
+	goto unwind;
+    }
+
+    /* Check for duplicate devices */
+    if (device_is_duplicate(config_info))
+	goto unwind;
+
+    LogMessage(X_INFO, "config/hal: Adding input device %s\n", driver);
+    if (NewInputDeviceRequest(input_options, &attrs, &dev) != Success) {
+	LogMessage(X_ERROR, "config/hal: NewInputDeviceRequest failed\n");
+	dev = NULL;
+	goto unwind;
+    }
+
+    dev->config_info = xstrdup(config_info);
+
+unwind:
+    free(config_info);
+    input_option_free_list(&input_options);
+}
+#endif
+
 static void
 device_added(LibHalContext * hal_ctx, const char *udi)
 {
@@ -395,6 +438,14 @@ device_added(LibHalContext * hal_ctx, const char *udi)
             input_option_new(input_options, "xkb_options", xkb_opts.options);
     input_options = input_option_new(input_options, "config_info", config_info);
 
+#ifdef SUNSOFT
+    InputOption *md = input_option_find(input_options, "mdriver");
+    if (md) {
+	char *mdriver = input_option_get_value(md);
+	add_extra_device (mdriver);
+    }
+#endif
+   
     /* this isn't an error, but how else do you output something that the user can see? */
     LogMessage(X_INFO, "config/hal: Adding input device %s\n", name);
     if ((rc = NewInputDeviceRequest(input_options, &attrs, &dev)) != Success) {

@@ -61,6 +61,11 @@ extern _X_EXPORT void AssignTypeAndName(DeviceIntPtr dev,
                                         Atom type,
                                         const char *name);
 
+#ifdef SUNSOFT
+extern _X_EXPORT DevPrivateKeyRec HotkeyMapDevicePrivateKeyRec;
+#define HotkeyMapDevicePrivateKey (&HotkeyMapDevicePrivateKeyRec)
+#endif
+
 #define BitIsOn(ptr, bit) (!!(((const BYTE *) (ptr))[(bit)>>3] & (1 << ((bit) & 7))))
 #define SetBit(ptr, bit)  (((BYTE *) (ptr))[(bit)>>3] |= (1 << ((bit) & 7)))
 #define ClearBit(ptr, bit) (((BYTE *)(ptr))[(bit)>>3] &= ~(1 << ((bit) & 7)))
