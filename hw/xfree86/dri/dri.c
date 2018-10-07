@@ -339,7 +339,11 @@ drmInstallSIGIOHandler(int fd, void (*f) (int, void *, void *))
     entry = drmGetEntry(fd);
     entry->f = f;
 
+#if defined(__sun) && defined(__SVR4)
+    return 1;
+#else
     return xf86InstallSIGIOHandler(fd, drmSIGIOHandler, 0);
+#endif
 }
 
 static int
@@ -349,7 +353,11 @@ drmRemoveSIGIOHandler(int fd)
 
     entry->f = NULL;
 
+#if defined(__sun) && defined(__SVR4)
+    return 1;
+#else
     return xf86RemoveSIGIOHandler(fd);
+#endif
 }
 
 Bool
