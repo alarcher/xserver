@@ -888,6 +888,11 @@ ProcessCommandLine(int argc, char *argv[])
         else if (strcmp(argv[i], "-reset") == 0) {
             dispatchExceptionAtReset = DE_RESET;
         }
+#ifdef SUNSOFT
+        else if (strcmp(argv[i], "-nobanner") == 0) {
+          /* ignore - just maintaining compatibility with Xsun CLI */
+        }
+#endif
         else if (strcmp(argv[i], "-p") == 0) {
             if (++i < argc)
                 defaultScreenSaverInterval = ((CARD32) atoi(argv[i])) *
