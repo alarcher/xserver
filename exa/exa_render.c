@@ -881,8 +881,9 @@ exaComposite(CARD8 op,
     Bool saveMaskRepeat = pMask ? pMask->repeat : 0;
     RegionRec region;
 
-    if (pExaScr->swappedOut)
-        goto fallback;
+    if (pExaScr->swappedOut || pSrc->pDrawable == NULL || 
+        (pMask != NULL && pMask->pDrawable == NULL))
+            goto fallback;
 
     /* Remove repeat in source if useless */
     if (pSrc->pDrawable && pSrc->repeat && !pSrc->transform && xSrc >= 0 &&
