@@ -59,14 +59,30 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 static unsigned
 LoadXKM(unsigned want, unsigned need, const char *keymap, XkbDescPtr *xkbRtrn);
 
+#ifdef MAKE_XKM_OUTPUT_DIR
+/* Borrow trans_mkdir from Xtransutil.c to more safely make directories */
+# undef X11_t
+# define TRANS_SERVER
+# define prmsg(lvl,...) \
+        if (lvl <= 1) { LogMessage(X_ERROR, __VA_ARGS__); } else ((void)0)
+# include <X11/Xtrans/Xtransutil.c>
+# ifndef XKM_OUTPUT_DIR_MODE
+#  define XKM_OUTPUT_DIR_MODE 0775
+# endif
+#endif
+
 static void
 OutputDirectory(char *outdir, size_t size)
 {
 #ifndef WIN32
+#ifdef MAKE_XKM_OUTPUT_DIR
+    if (geteuid() == 0 && trans_mkdir(XKM_OUTPUT_DIR, XKM_OUTPUT_DIR_MODE) == 0 && (strlen(XKM_OUTPUT_DIR) < size)) {
+#else
     /* Can we write an xkm and then open it too? */
     if (access(XKM_OUTPUT_DIR, W_OK | X_OK) == 0 &&
         (strlen(XKM_OUTPUT_DIR) < size)) {
-        (void) strcpy(outdir, XKM_OUTPUT_DIR);
+#endif
+        (void) strcpy (outdir, XKM_OUTPUT_DIR);
     }
     else
 #else
@@ -110,6 +126,15 @@ RunXkbComp(xkbcomp_buffer_callback callback, void *userdata)
     const char *xkmfile = "-";
 #endif
 
+    /* save gid and reset to gid 0 before making xkm_output_dir or
+       running xkbcomp to create the xkm file in it. */
+    gid_t usr_gid = getgid();
+
+    if (setregid(0, usr_gid) < 0)
+        ErrorF("Error in setting regid to 0: %s\n", strerror(errno));
+    if (setegid(0) < 0)
+        ErrorF("Error in setting egid to 0: %s\n", strerror(errno));
+    
     snprintf(keymap, sizeof(keymap), "server-%s", display);
 
     OutputDirectory(xkm_output_dir, sizeof(xkm_output_dir));
@@ -160,6 +185,11 @@ RunXkbComp(xkbcomp_buffer_callback callback, void *userdata)
 #else
     out = fopen(tmpname, "w");
 #endif
+
+    if (setregid(usr_gid, 0) < 0)
+        ErrorF("Error in resetting regid: %s\n", strerror(errno));
+    if (setegid(usr_gid) < 0)
+        ErrorF("Error in resetting egid: %s\n", strerror(errno));
 
     if (out != NULL) {
         /* Now write to xkbcomp */

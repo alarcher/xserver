@@ -1,6 +1,7 @@
 noinst_LTLIBRARIES = libxkb.la libxkbstubs.la
 
 AM_CFLAGS = $(DIX_CFLAGS)
+AM_CFLAGS += -DMAKE_XKM_OUTPUT_DIR
 
 DDX_SRCS = \
         ddxBeep.c \
