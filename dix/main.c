@@ -118,6 +118,11 @@ Equipment Corporation.
 #include "dpmsproc.h"
 #endif
 
+#ifdef SUNSOFT
+extern void DtloginInit(void);
+extern void DtloginCloseDown(void);
+#endif /* SUNSOFT */
+
 extern void Dispatch(void);
 
 CallbackListPtr RootWindowFinalizeCallback = NULL;
@@ -152,6 +157,13 @@ dix_main(int argc, char *argv[], char *envp[])
         InitBlockAndWakeupHandlers();
         /* Perform any operating system dependent initializations you'd like */
         OsInit();
+
+#ifdef SUNSOFT
+        /* Create pipe for dtlogin authentication info before we tell dtlogin 
+           we're done and ready for it to run. */
+        DtloginInit ();
+#endif
+
         if (serverGeneration == 1) {
             CreateWellKnownSockets();
             for (i = 1; i < LimitClients; i++)
@@ -275,6 +287,11 @@ dix_main(int argc, char *argv[], char *envp[])
         InputThreadInit();
 
         Dispatch();
+
+#ifdef SUNSOFT
+        /* Return to root privs before calling the rest of close down */
+        DtloginCloseDown ();
+#endif
 
         UndisplayDevices();
         DisableAllDevices();

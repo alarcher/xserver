@@ -55,6 +55,9 @@ if BUSFAULT
 libos_la_SOURCES += $(BUSFAULT_SRCS)
 endif
 
+libos_la_SOURCES += dtlogin.c
+libos_la_LIBADD += -lproject
+
 EXTRA_DIST = $(SECURERPC_SRCS) $(XDMCP_SRCS)
 
 if SPECIAL_DTRACE_OBJECTS

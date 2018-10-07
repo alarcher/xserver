@@ -278,6 +278,19 @@ AddAuthorization(unsigned name_length, const char *name,
     return 0;
 }
 
+#ifdef SUNSOFT
+/* This function is called from dtlogin.c 
+ * This is added to do "chmod authorization_file" since
+ * this file is owned by root and we need to change this
+ * to user logged on.  
+ */
+const char *
+GetAuthFilename(void)
+{
+    return (authorization_file);
+}
+#endif
+
 #ifdef XCSECURITY
 
 XID
