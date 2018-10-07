@@ -152,6 +152,12 @@ InitPathList(const char *path)
                 list[n][len - 1] = '/';
                 list[n][len] = '\0';
             }
+
+#ifdef SUNSOFT /* strip amd64/ off loader path if it's there */
+            if (strcmp(list[n] + (len - 6), "amd64/") == 0) {
+                    list[n][len - 6] = '\0';
+            }
+#endif
             n++;
         }
         elem = strtok(NULL, ",");
@@ -270,6 +276,24 @@ FindModuleInSubdir(const char *dirpath, const char *module)
     char *ret = NULL, tmpBuf[PATH_MAX];
     struct stat stat_buf;
 
+#if defined(SUNSOFT) && defined(__x86)
+    Bool in_64_dir = FALSE;
+
+    if (strstr(dirpath, "/amd64") != NULL) {
+# if !(defined(__amd64) || defined(__amd64__))
+       return NULL;
+# else
+       in_64_dir = TRUE;
+# endif
+    }
+    /* After the 32-bit EOF, all modules under /usr/lib/xorg are 64-bit,
+       but legacy modules under /usr/X11/lib are still split into 32-bit
+       and 64-bit versions. Not in OpenIndiana */
+    //if (strncmp(dirpath, "/usr/X11/lib/modules/", 21) != 0) {
+    //    in_64_dir = TRUE;
+    //}
+#endif
+
     dir = opendir(dirpath);
     if (!dir)
         return NULL;
@@ -277,6 +301,12 @@ FindModuleInSubdir(const char *dirpath, const char *module)
     while ((direntry = readdir(dir))) {
         if (direntry->d_name[0] == '.')
             continue;
+
+#if defined(SUNSOFT) && (defined(__i386) || defined(__i386__))
+        /* skip 64-bit subdirectories when running 32-bit server */
+        if (strcmp(direntry->d_name, "amd64") == 0)
+            continue;
+#endif
         snprintf(tmpBuf, PATH_MAX, "%s%s/", dirpath, direntry->d_name);
         /* the stat with the appended / fails for normal files,
            and works for sub dirs fine, looks a bit strange in strace
@@ -286,6 +316,12 @@ FindModuleInSubdir(const char *dirpath, const char *module)
                 break;
             continue;
         }
+
+#if defined(SUNSOFT) && (defined(__amd64) || defined(__amd64__))
+        /* Don't match files in non-amd64 directories */
+        if (!in_64_dir)
+            continue;
+#endif
 
 #ifdef __CYGWIN__
         snprintf(tmpBuf, PATH_MAX, "cyg%s.dll", module);
