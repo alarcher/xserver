@@ -23,6 +23,16 @@
 
 /* Standalone VESA CVT standard timing modelines generator. */
 
+
+/* These are needed for building the standalone cvt utility using code that
+   was built against headers expecting these to be defined in dix/regions.o
+   Oracle bug 16418361 */
+#if (defined(__sparc__) || defined(__sparc))
+#include "regionstr.h"
+_X_EXPORT BoxRec RegionEmptyBox = { 0, 0, 0, 0 };
+_X_EXPORT RegDataRec RegionEmptyData = { 0, 0 };
+#endif
+
 #include "xf86.h"
 #include "xf86Modes.h"
 
