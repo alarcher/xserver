@@ -420,6 +420,11 @@ maskShift(Pixel p)
  * the set which can be used with this version of cfb.
  */
 
+#if defined(__sparc__) || defined(__sparc)
+_X_EXPORT miInitVisualsProcPtr miInitVisualsProc = NULL;
+#endif /* __sparc__ */
+
+
 Bool
 miInitVisuals(VisualPtr * visualp, DepthPtr * depthp, int *nvisualp,
               int *ndepthp, int *rootDepthp, VisualID * defaultVisp,
@@ -437,6 +442,13 @@ miInitVisuals(VisualPtr * visualp, DepthPtr * depthp, int *nvisualp,
     miVisualsPtr visuals, nextVisuals;
     int *preferredCVCs, *prefp;
     int first_depth;
+
+#if defined(__sparc__) || defined(__sparc)
+    if (miInitVisualsProc) {
+       return (miInitVisualsProc(visualp, depthp, nvisualp, ndepthp,
+               rootDepthp, defaultVisp, sizes, bitsPerRGB, preferredVis));
+    }
+#endif /* __sparc__ */
 
     /* none specified, we'll guess from pixmap formats */
     if (!miVisuals) {
