@@ -19,6 +19,7 @@ libos_la_SOURCES = 	\
 	inputthread.c	\
 	io.c		\
 	mitauth.c	\
+	osaudit.c	\
 	oscolor.c	\
 	osdep.h		\
 	osinit.c	\

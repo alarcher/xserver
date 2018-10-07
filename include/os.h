@@ -719,4 +719,8 @@ os_move_fd(int fd);
 extern _X_EXPORT int
 xthread_sigmask(int how, const sigset_t *set, sigset_t *oldest);
 
+/* in osaudit.c */
+extern void
+OSAuditInit (void);
+
 #endif                          /* OS_H */

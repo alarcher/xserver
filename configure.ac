@@ -249,6 +249,12 @@ AC_CHECK_HEADER([execinfo.h],[
     ])]
 )
 
+# Solaris auditing
+AC_CHECK_LIB([bsm], [adt_start_session], [HAVE_LIBBSM=yes ; SYS_LIBS=-lbsm ;
+    AC_DEFINE([HAVE_LIBBSM], [],
+        [Define to 1 if you have the Solaris auditing library (-lbsm)])])
+AM_CONDITIONAL([HAVE_LIBBSM], [test "x$HAVE_LIBBSM" = xyes])
+
 dnl ---------------------------------------------------------------------------
 dnl Bus options and CPU capabilities.  Replaces logic in
 dnl hw/xfree86/os-support/bus/Makefile.am, among others.

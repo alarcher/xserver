@@ -119,6 +119,9 @@
 /* Define to 1 if you have the `bsd' library (-lbsd). */
 #undef HAVE_LIBBSD
 
+/* Define to 1 if you have the Solaris BSM auditing library (-lbsm) */
+#undef HAVE_LIBBSM
+
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
 
