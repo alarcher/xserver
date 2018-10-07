@@ -545,7 +545,9 @@ UseMsg(void)
     ErrorF("-ls int                limit stack space to N Kb\n");
 #endif
 #ifdef LOCK_SERVER
+#ifndef SUNSOFT /* Not in Sun version as required by PSARC 2004/187 TCR */
     ErrorF("-nolock                disable the locking mechanism\n");
+#endif
 #endif
     ErrorF("-maxclients n          set maximum number of clients (power of two)\n");
     ErrorF("-nolisten string       don't listen on protocol\n");
@@ -842,6 +844,7 @@ ProcessCommandLine(int argc, char *argv[])
         }
 #endif
 #ifdef LOCK_SERVER
+#ifndef SUNSOFT /* Not in Sun version as required by PSARC 2004/187 TCR */
         else if (strcmp(argv[i], "-nolock") == 0) {
 #if !defined(WIN32) && !defined(__CYGWIN__)
             if (getuid() != 0)
@@ -851,6 +854,7 @@ ProcessCommandLine(int argc, char *argv[])
 #endif
                 nolock = TRUE;
         }
+#endif
 #endif
 	else if ( strcmp( argv[i], "-maxclients") == 0)
 	{
