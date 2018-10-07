@@ -191,6 +191,8 @@ fi
 dnl Find the math libary, then check for cbrt function in it.
 AC_CHECK_LIB(m, sqrt)
 AC_CHECK_FUNCS([cbrt])
+# But we don't want to link everything with libm
+LIBS="${LIBS//-lm}"
 
 dnl AGPGART headers
 AC_CHECK_HEADERS([linux/agpgart.h sys/agpio.h sys/agpgart.h], AGP=yes)
@@ -1712,6 +1714,7 @@ XSERVER_CFLAGS="${XSERVER_CFLAGS} ${XSERVERCFLAGS_CFLAGS}"
 XSERVER_LIBS="$DIX_LIB $MI_LIB $OS_LIB"
 XSERVER_SYS_LIBS="${XSERVERLIBS_LIBS} ${SYS_LIBS} ${LIBS}"
 XSERVER_SYS_LIBS="${XSERVER_SYS_LIBS} -lproject"
+XSERVER_SYS_LIBS="${XSERVER_SYS_LIBS} -lm"
 AC_SUBST([XSERVER_LIBS])
 AC_SUBST([XSERVER_SYS_LIBS])
 

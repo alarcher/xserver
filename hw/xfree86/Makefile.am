@@ -142,7 +142,7 @@ CLEANFILES = sdksyms.c sdksyms.dep Xorg.sh
 EXTRA_DIST += sdksyms.sh
 
 sdksyms.dep sdksyms.c: sdksyms.sh
-	$(AM_V_GEN)CPP='$(CPP)' AWK='$(AWK)' $(SHELL) $(srcdir)/sdksyms.sh $(top_srcdir) $(CFLAGS) $(AM_CFLAGS) $(AM_CPPFLAGS)
+	$(AM_V_GEN)CPP='$(CPP)' AWK='$(AWK)' SED='$(SED)' $(SHELL) $(srcdir)/sdksyms.sh $(top_srcdir) $(CFLAGS) $(AM_CFLAGS) $(AM_CPPFLAGS) -I/usr/include -I/usr/include/xorg -I/usr/include/pixman-1 -I/usr/include/X11/dri
 
 SDKSYMS_DEP = sdksyms.dep
 -include $(SDKSYMS_DEP)
