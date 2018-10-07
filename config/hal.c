@@ -1,6 +1,7 @@
 /*
  * Copyright © 2007 Daniel Stone
  * Copyright © 2007 Red Hat, Inc.
+ * Copyright (c) 2013 Oracle and/or its affiliates. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -39,6 +40,23 @@
 #include "hotplug.h"
 #include "config-backends.h"
 #include "os.h"
+
+#if ((defined(__sparc__) || defined(__sparc)) && defined(SUNSOFT))
+#include <sys/stat.h>
+#include <unistd.h>
+
+#define MAX_DEVICES	4
+
+DeviceIntPtr added_devices[MAX_DEVICES];
+int num_added_devices = 0;
+Bool abort_on_fail_over = FALSE;
+static Bool do_abort = FALSE;
+
+extern int  num_total_disp_dev;
+extern int  num_session_disp_dev;
+extern char disp_dev_path[PATH_MAX];
+extern void GiveUp(int sig);
+#endif
 
 #define LIBHAL_PROP_KEY "input.x11_options."
 #define LIBHAL_XKB_PROP_KEY "input.xkb."
@@ -167,6 +185,51 @@ unwind:
 }
 #endif
 
+#if defined(SUNSOFT) && (defined(__sparc__) || defined(__sparc))
+Bool check_inactive_session(char const *path) {
+    struct stat statbuf;
+    char linkpath[PATH_MAX];
+    ssize_t readstatus;
+    char *usbpath = NULL;
+    char *ptr;
+    char disppath[PATH_MAX];
+
+    if ((num_session_disp_dev == num_total_disp_dev) || !disp_dev_path[0])
+	return FALSE;
+
+    if (lstat(path, &statbuf) == 0 &&
+		(statbuf.st_mode & S_IFMT) == S_IFLNK) {
+	readstatus = readlink(path, linkpath, sizeof(linkpath));
+
+	if (readstatus > 0 && readstatus < sizeof(linkpath)) {
+	    linkpath[readstatus] = 0;
+	    usbpath = linkpath;
+	    if (strncmp(usbpath, "../..", sizeof("../..") - 1) == 0)
+		usbpath += sizeof("../..") - 1;
+	    if (strncmp(usbpath, "/devices", sizeof("/devices") - 1) == 0)
+		usbpath += sizeof("/devices") - 1;
+	}
+    }
+
+    if (!usbpath)
+	return FALSE;
+
+    if (ptr = strchr(usbpath + 1, '/'))
+	*ptr = 0;
+    else
+	return FALSE;
+    
+    strncpy(disppath, disp_dev_path, sizeof(disppath));
+
+    if (ptr = strchr(disppath + 1, '/'))
+	*ptr = 0;
+    else
+	return FALSE;
+
+    return (strcmp(usbpath, disppath));
+}
+#endif
+
 static void
 device_added(LibHalContext * hal_ctx, const char *udi)
 {
@@ -178,6 +241,11 @@ device_added(LibHalContext * hal_ctx, const char *udi)
     DBusError error;
     struct xkb_options xkb_opts = { 0 };
     int rc;
+
+#if ((defined(__sparc__) || defined(__sparc)) && defined(SUNSOFT))
+    if (do_abort)
+	return;
+#endif
 
     LibHalPropertySet *set = NULL;
     LibHalPropertySetIterator set_iter;
@@ -276,6 +344,28 @@ device_added(LibHalContext * hal_ctx, const char *udi)
 
     input_options = input_option_new(input_options, "driver", driver);
     input_options = input_option_new(input_options, "name", name);
+
+#if ((defined(__sparc__) || defined(__sparc)) && defined(SUNSOFT))
+    if (!strcmp(name, "keyboard") || !strcmp(name, "mouse")) {
+	if (check_inactive_session(path)) {
+	    if (abort_on_fail_over) {
+		/* M5: Input devices were removed, new input device added is to
+		   activate another session, reset it.
+		 */
+		do_abort = TRUE;
+		LogMessage(X_INFO, "config/hal: Server to abort\n");
+	    } else
+		/* M5: No removal of input devices happened, new input device 
+		   added is to activate another session, do nothing.
+		 */
+		LogMessage(X_INFO, "config/hal: Not adding input device %s\n", name);
+
+            goto unwind;
+	} else
+	    /* M5: new input device added is to activate current session. */
+	    abort_on_fail_over = FALSE;
+    }
+#endif
 
     if (asprintf(&config_info, "hal:%s", udi) == -1) {
         config_info = NULL;
@@ -455,6 +545,26 @@ device_added(LibHalContext * hal_ctx, const char *udi)
         goto unwind;
     }
 
+#if ((defined(__sparc__) || defined(__sparc)) && defined(SUNSOFT))
+    if ((num_session_disp_dev < num_total_disp_dev) &&
+		(!strcmp(name, "keyboard") || !strcmp(name, "mouse"))) {
+	int i;
+
+	if (num_added_devices == MAX_DEVICES) {
+	    LogMessage(X_ERROR, "config/hal: Too manay devices to add\n");
+	    goto unwind;
+	}
+
+	for (i = 0; i < MAX_DEVICES; i++) {
+	    if (added_devices[i] == 0) {
+		added_devices[i] = dev;
+		num_added_devices++;
+		break;
+	    }
+	}
+    }
+#endif
+	
  unwind:
     if (set)
         libhal_free_property_set(set);
@@ -487,6 +597,12 @@ device_added(LibHalContext * hal_ctx, const char *udi)
 
     dbus_error_free(&error);
 
+#if ((defined(__sparc__) || defined(__sparc)) && defined(SUNSOFT))
+    if (do_abort) {
+	config_fini();
+	GiveUp(0);
+    }
+#endif
     return;
 }
 

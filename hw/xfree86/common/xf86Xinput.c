@@ -45,6 +45,9 @@
  * the sale, use or other dealings in this Software without prior written
  * authorization from the copyright holder(s) and author(s).
  */
+/*
+ * Copyright (c) 2013 Oracle and/or its affiliates. All Rights Reserved.
+ */
 
 #ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
@@ -123,6 +126,15 @@ static struct xorg_list new_input_devices_list = {
     .next = &new_input_devices_list,
     .prev = &new_input_devices_list,
 };
+
+#if ((defined(__sparc__) || defined(__sparc)) && defined(sun))
+#define MAX_DEVICES       	4
+extern int  num_total_disp_dev;
+extern int  num_session_disp_dev;
+extern DeviceIntPtr added_devices[MAX_DEVICES];
+extern int num_added_devices;
+extern Bool abort_on_fail_over;
+#endif
 
 /**
  * Eval config and modify DeviceVelocityRec accordingly
@@ -1525,6 +1537,25 @@ xf86DisableDevice(DeviceIntPtr dev, Bool panic)
         SendDevicePresenceEvent(dev->id, DeviceUnrecoverable);
         DeleteInputDeviceRequest(dev);
     }
+
+#if ((defined(__sparc__) || defined(__sparc)) && defined(sun))
+    if (num_session_disp_dev < num_total_disp_dev) {
+	int i;
+
+	for (i = 0; i < MAX_DEVICES; i++) {
+	    if (added_devices[i] == dev) {
+		added_devices[i] = 0;
+		if (--num_added_devices == 0)
+		    /* M5: will abort server when another X session
+		       is activated.
+		     */
+		    abort_on_fail_over = TRUE;
+
+		break;
+	    }
+	}
+    }
+#endif
 }
 
 /**

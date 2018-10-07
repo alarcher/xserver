@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 1997-2003 by The XFree86 Project, Inc.
+ * Copyright (c) 2013 Oracle and/or its affiliates. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -53,6 +54,12 @@
 
 /* Bus-specific globals */
 int pciSlotClaimed = 0;
+
+#if ((defined(__sparc__) || defined(__sparc)) && defined (sun))
+int  num_total_disp_dev = 0;
+int  num_session_disp_dev = 0;
+char disp_dev_path[PATH_MAX];
+#endif
 
 #define PCIINFOCLASSES(c) \
     ( (((c) & 0x00ff0000) == (PCI_CLASS_PREHISTORIC << 16)) \
@@ -115,6 +122,11 @@ xf86PciProbe(void)
                 primaryBus.id.pci = info;
             }
             info->user_data = 0;
+
+#if ((defined(__sparc__) || defined(__sparc)) && defined (sun))
+	    if (IS_VGA(info->device_class))
+		num_total_disp_dev++;
+#endif
         }
     }
     free(iter);
@@ -487,6 +499,15 @@ xf86PciProbeDev(DriverPtr drvp)
     const struct pci_id_match *const devices = drvp->supported_devices;
     GDevPtr *devList;
     const unsigned numDevs = xf86MatchDevice(drvp->driverName, &devList);
+#if ((defined(__sparc__) || defined(__sparc)) && defined (sun))
+    struct sol_device_private {
+	struct pci_device  base;
+	const char * device_string;
+    };
+#define DEV_PATH(dev)    (((struct sol_device_private *) dev)->device_string)
+
+    num_session_disp_dev = numDevs;
+#endif
 
     for (i = 0; i < numDevs; i++) {
         struct pci_device_iterator *iter;
@@ -564,6 +585,11 @@ xf86PciProbeDev(DriverPtr drvp)
                     if ((*drvp->PciProbe) (drvp, entry, pPci,
                                            devices[j].match_data)) {
                         foundScreen = TRUE;
+
+#if ((defined(__sparc__) || defined(__sparc)) && defined (sun))
+			strncpy(disp_dev_path, DEV_PATH(pPci), sizeof(disp_dev_path));
+#endif
+
                     }
                     else
                         xf86UnclaimPciSlot(pPci, devList[i]);
@@ -572,6 +598,7 @@ xf86PciProbeDev(DriverPtr drvp)
                 break;
             }
         }
+
     }
     free(devList);
 
