@@ -259,12 +259,14 @@ glxConvertConfigs(const __DRIcoreExtension * core,
 
 static const char dri_driver_path[] = DRI_DRIVER_PATH;
 
+#if 0
 /* Temporary define to allow building without a dri_interface.h from
  * updated Mesa.  Some day when we don't care about Mesa that old any
  * more this can be removed.
  */
 #ifndef __DRI_DRIVER_GET_EXTENSIONS
 #define __DRI_DRIVER_GET_EXTENSIONS "__driDriverGetExtensions"
+#endif
 #endif
 
 void *
@@ -318,6 +320,7 @@ glxProbeDriver(const char *driverName,
         goto cleanup_failure;
     }
 
+#if 0
     if (asprintf(&get_extensions_name, "%s_%s",
                  __DRI_DRIVER_GET_EXTENSIONS, driverName) != -1) {
         const __DRIextension **(*get_extensions)(void);
@@ -329,7 +332,8 @@ glxProbeDriver(const char *driverName,
     }
 
     if (!extensions)
-        extensions = dlsym(driver, __DRI_DRIVER_EXTENSIONS);
+#endif
+    extensions = dlsym(driver, __DRI_DRIVER_EXTENSIONS);
     if (extensions == NULL) {
         LogMessage(X_ERROR, "AIGLX error: %s exports no extensions (%s)\n",
                    driverName, dlerror());
