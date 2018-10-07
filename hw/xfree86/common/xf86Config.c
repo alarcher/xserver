@@ -254,6 +254,7 @@ xf86ModulelistFromConfig(void ***optlist)
 
     const char *ignore[] = { "GLcore", "speedo", "bitmap", "drm",
         "freetype", "type1",
+        "bitstream", "ia", "xtsol",
         NULL
     };
     void **optarray;
