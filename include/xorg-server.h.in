@@ -203,6 +203,7 @@
 /* Have X server platform bus support */
 #undef XSERVER_PLATFORM_BUS
 
+#include <sys/isa_defs.h> /* Ensure _LP64 is defined when needed on Solaris */
 #ifdef _LP64
 #define _XSERVER64 1
 #endif

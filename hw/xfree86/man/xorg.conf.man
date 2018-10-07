@@ -36,9 +36,9 @@ server is started as a normal user:
 .RS 4
 .nf
 .IR /etc/X11/ <cmdline>
-.IR @projectroot@/etc/X11/ <cmdline>
+.IR @projectroot@/lib/X11/ <cmdline>
 .IB /etc/X11/ $XORGCONFIG
-.IB @projectroot@/etc/X11/ $XORGCONFIG
+.IB @projectroot@/lib/X11/ $XORGCONFIG
 .I /etc/X11/xorg.conf
 .I /etc/xorg.conf
 .IR @projectroot@/etc/X11/xorg.conf. <hostname>
@@ -67,10 +67,10 @@ search locations are as follows:
 .nf
 <cmdline>
 .IR /etc/X11/ <cmdline>
-.IR @projectroot@/etc/X11/ <cmdline>
+.IR @projectroot@/lib/X11/ <cmdline>
 .B $XORGCONFIG
 .IB /etc/X11/ $XORGCONFIG
-.IB @projectroot@/etc/X11/ $XORGCONFIG
+.IB @projectroot@/lib/X11/ $XORGCONFIG
 .I /etc/X11/xorg.conf
 .I /etc/xorg.conf
 .IR @projectroot@/etc/X11/xorg.conf. <hostname>

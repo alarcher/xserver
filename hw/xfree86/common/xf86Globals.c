@@ -137,7 +137,8 @@ xf86InfoRec xf86Info = {
 
 const char *xf86ConfigFile = NULL;
 const char *xf86ConfigDir = NULL;
-const char *xf86ModulePath = DEFAULT_MODULE_PATH;
+/* Sun: add old module path for compatibility with out-of-tree driver packages */
+const char *xf86ModulePath = DEFAULT_MODULE_PATH ",/usr/X11/lib/modules/";
 MessageType xf86ModPathFrom = X_DEFAULT;
 const char *xf86LogFile = DEFAULT_LOGDIR "/" DEFAULT_LOGPREFIX;
 MessageType xf86LogFileFrom = X_DEFAULT;
